@@ -1,0 +1,1 @@
+"""NAV vacancy ingestion package."""

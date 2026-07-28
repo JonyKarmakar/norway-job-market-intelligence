@@ -60,9 +60,9 @@ git status --short
 
 - Commit: Created and pushed as `docs: define project scope and NAV feed strategy`
 - Push: Pushed to `origin/docs/day-02-project-definition`
-- Pull request: Opened as PR #2
-- CI: Passed — `CI/python-quality (pull_request)`
-- Merge: Pending final verification
+- Pull request: PR #2 merged
+- CI: Pull-request and `main` push checks passed
+- Merge: Squash-merged into `main` as `a3b5586`
 
 ## Decisions made
 
@@ -85,11 +85,10 @@ git status --short
 - A numerical rate limit or recommended polling interval has not been confirmed.
 - Timestamp relationships and enum values require validation against real responses.
 - Initial PostgreSQL schemas will be designed during Day 3.
-- PR #2 has not yet been squash-merged into `main`.
 
 ## Next exact task
 
-Commit and push this status update, verify CI again and squash-merge PR #2.
+Begin Day 3 by designing the initial PostgreSQL source and operational schemas.
 
 ## Next command
 

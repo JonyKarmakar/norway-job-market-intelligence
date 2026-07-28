@@ -58,11 +58,11 @@ git status --short
 
 ## Commit status
 
-- Commit: Created locally as `docs: define project scope and NAV feed strategy`
-- Push: Not pushed
-- Pull request: Not opened
-- CI: Not started
-- Merge: Not applicable yet
+- Commit: Created and pushed as `docs: define project scope and NAV feed strategy`
+- Push: Pushed to `origin/docs/day-02-project-definition`
+- Pull request: Opened as PR #2
+- CI: Passed — `CI/python-quality (pull_request)`
+- Merge: Pending final verification
 
 ## Decisions made
 
@@ -85,14 +85,14 @@ git status --short
 - A numerical rate limit or recommended polling interval has not been confirmed.
 - Timestamp relationships and enum values require validation against real responses.
 - Initial PostgreSQL schemas will be designed during Day 3.
-- GitHub CI has not yet run for the Day 2 branch.
+- PR #2 has not yet been squash-merged into `main`.
 
 ## Next exact task
 
-Push the Day 2 branch and open the pull request.
+Commit and push this status update, verify CI again and squash-merge PR #2.
 
 ## Next command
 
 ```bash
-git push -u origin docs/day-02-project-definition
+git add docs/checkpoints/0002-week1-day2-project-definition.md
 ```

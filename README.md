@@ -76,14 +76,18 @@ The first version intentionally excludes:
 .
 ├── .github/
 │   ├── pull_request_template.md
-│   └── workflows/ci.yml
+│   └── workflows/
+│       └── ci.yml
 ├── docs/
 │   ├── checkpoints/
+│   ├── data-source-notes.md
+│   ├── decisions.md
 │   ├── project-brief.md
+│   ├── project-specification.md
 │   └── roadmap.md
 ├── sql/
-│   ├── exercises/
-│   └── solutions/
+│   └── development/
+│       └── sample_job_ads_analysis.sql
 ├── src/
 │   └── norway_job_market_intelligence/
 ├── tests/
@@ -98,9 +102,11 @@ The first version intentionally excludes:
 
 ## Current status
 
-**Week 1, Day 1: Foundation**
+**Week 1, Day 2: Project definition and NAV source analysis**
 
-The initial repository scaffold, Python package, quality tooling, PostgreSQL development service, SQL baseline exercise, CI workflow, and checkpoint templates are included.
+The project purpose, users, MVP, non-goals and success measurements are now defined. The current NAV `pam-stilling-feed` contract, market-coverage limitations, update behaviour, authentication approach, privacy decisions and initial architecture decisions are documented.
+
+Production NAV ingestion has not started yet.
 
 ## Local setup
 
@@ -199,9 +205,12 @@ git push -u origin feature/week1-day1-foundation
 - Every milestone should produce visible portfolio evidence.
 - Every pull request should remain focused and reviewable.
 
-## Documentation
+## Project documentation
 
-- Full brief: `docs/project-brief.md`
-- Roadmap: `docs/roadmap.md`
-- Checkpoint template: `docs/checkpoints/TEMPLATE.md`
-- Day 1 checkpoint draft: `docs/checkpoints/0001-week1-day1-foundation.md`
+- [Project brief](docs/project-brief.md)
+- [Detailed project specification](docs/project-specification.md)
+- [NAV data-source notes](docs/data-source-notes.md)
+- [Architecture decisions](docs/decisions.md)
+- [Development roadmap](docs/roadmap.md)
+- [Checkpoint template](docs/checkpoints/TEMPLATE.md)
+- [Week 1 Day 1 checkpoint](docs/checkpoints/0001-week1-day1-foundation.md)

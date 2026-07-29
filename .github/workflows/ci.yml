@@ -36,3 +36,20 @@ jobs:
 
       - name: Run tests
         run: pytest
+
+  database-schema:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Start PostgreSQL
+        run: docker compose up -d --wait db
+
+      - name: Verify NAV ingestion schema
+        run: make db-schema-test
+
+      - name: Stop PostgreSQL
+        if: always()
+        run: docker compose down -v --remove-orphans

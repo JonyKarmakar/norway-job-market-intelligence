@@ -112,3 +112,49 @@ NAV does not receive every publicly advertised vacancy, and FINN.no advertisemen
 - Dashboard and API documentation must include the coverage limitation.
 - Analytical conclusions must be described as dataset observations.
 - Comparisons and trends must not be presented as complete national-market measurements.
+
+## ADR-006 — Use separate NAV ingestion tables for events, current state and feed progress
+
+### Status
+
+Accepted
+
+### Decision
+
+The initial PostgreSQL ingestion model will use three separate tables:
+
+- `nav_feed_events` for immutable, privacy-minimised source events
+- `job_advertisements_current` for the latest known state of each advertisement
+- `nav_feed_progress` for resumable polling and conditional-request metadata
+
+Operational identifiers, statuses and timestamps will use typed columns.
+Privacy-minimised source payloads will remain in JSONB until their live
+structure and analytical requirements are verified.
+
+The current-state table will reference its latest historical event using both
+the event identifier and advertisement identifier.
+
+### Reason
+
+Historical events, current vacancy queries and feed recovery have different
+storage and update requirements.
+
+Separating them preserves source history, supports efficient current-state
+queries and prevents feed progress from advancing independently of successful
+event processing.
+
+A composite relationship between current state and historical events prevents
+an advertisement from referencing an event that belongs to another
+advertisement.
+
+### Consequences
+
+- Historical source events are inserted rather than overwritten.
+- Current advertisement rows may be updated as newer events are accepted.
+- Feed progress must advance in the same transaction as successful event and
+  current-state processing.
+- Personal contact data must be removed before either JSONB payload is stored.
+- Provisional source assumptions remain documented rather than enforced through
+  unverified enums, triggers or complex analytical columns.
+- The initial tables remain in PostgreSQL's `public` schema until a dedicated
+  ingestion namespace is justified.

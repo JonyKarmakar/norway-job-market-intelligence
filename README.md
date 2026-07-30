@@ -102,11 +102,11 @@ The first version intentionally excludes:
 
 ## Current status
 
-**Week 1, Day 2: Project definition and NAV source analysis**
+**NAV feed client and privacy foundation**
 
-The project purpose, users, MVP, non-goals and success measurements are now defined. The current NAV `pam-stilling-feed` contract, market-coverage limitations, update behaviour, authentication approach, privacy decisions and initial architecture decisions are documented.
+The project now includes a typed and tested NAV feed client foundation, environment-backed configuration, conditional-request support, privacy minimisation, canonical JSON serialization and deterministic SHA-256 hashing.
 
-Production NAV ingestion has not started yet.
+All HTTP tests use mocked transports and do not contact the live NAV service. Live NAV ingestion, PostgreSQL persistence, pagination orchestration and feed-progress updates have not started yet.
 
 ## Local setup
 
@@ -126,11 +126,10 @@ py -3.11 -m venv njmi-env
 njmi-env\Scripts\Activate.ps1
 ```
 
-### 2. Upgrade pip and install the project
+### 2. Install the locked development environment
 
 ```bash
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
+make install
 ```
 
 ### 3. Copy local environment variables
@@ -144,16 +143,13 @@ Do not commit `.env`.
 ### 4. Run local checks
 
 ```bash
-ruff check .
-ruff format --check .
-pytest
+make quality
 ```
 
 ### 5. Start PostgreSQL
 
 ```bash
-docker compose up -d db
-docker compose ps
+make db-up
 ```
 
 ### 6. Run the baseline SQL analysis
@@ -161,7 +157,7 @@ docker compose ps
 ```bash
 make sql-analysis
 ```
-This command initializes a temporary synthetic job-advertisement dataset, runs eight baseline analyses, and rolls back the transaction so no practice data remains in PostgreSQL.
+This command initializes a temporary synthetic job-advertisement dataset, runs 21 analytical queries, and rolls back the transaction so no practice data remains in PostgreSQL.
 
 ### 7. Stop PostgreSQL
 
@@ -188,11 +184,11 @@ Example:
 ```bash
 git switch main
 git pull --ff-only
-git switch -c feature/week1-day1-foundation
+git switch -c feature/nav-feed-client-foundation
 
 git add .
-git commit -m "chore: initialize project foundation"
-git push -u origin feature/week1-day1-foundation
+git commit -m "feat: add NAV feed client foundation"
+git push -u origin feature/nav-feed-client-foundation
 ```
 
 ## Quality principles
@@ -210,6 +206,8 @@ git push -u origin feature/week1-day1-foundation
 - [Project brief](docs/project-brief.md)
 - [Detailed project specification](docs/project-specification.md)
 - [NAV data-source notes](docs/data-source-notes.md)
+- [NAV feed client foundation](docs/nav-feed-client.md)
+- [Initial NAV ingestion data model](docs/data-model-v0.md)
 - [Architecture decisions](docs/decisions.md)
 - [Development roadmap](docs/roadmap.md)
 - [Checkpoint template](docs/checkpoints/TEMPLATE.md)

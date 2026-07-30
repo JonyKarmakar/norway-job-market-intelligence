@@ -129,8 +129,12 @@ database trigger is introduced in this initial model.
 
 `payload_hash` is retained for integrity checking and diagnostics, but it is
 not the initial uniqueness key. Different NAV events may legitimately contain
-the same privacy-minimised payload, and canonical JSON hashing has not yet been
-implemented or verified.
+the same privacy-minimised payload.
+
+Canonical JSON serialization and deterministic SHA-256 hashing are implemented
+and covered by unit tests in the Python ingestion foundation. Database
+persistence of the calculated hash will be introduced with the event-insertion
+workflow.
 
 ### `job_advertisements_current`
 

@@ -158,3 +158,70 @@ advertisement.
   unverified enums, triggers or complex analytical columns.
 - The initial tables remain in PostgreSQL's `public` schema until a dedicated
   ingestion namespace is justified.
+
+## ADR-007 — Keep the NAV HTTP client limited to one feed page
+
+### Status
+
+Accepted
+
+### Decision
+
+The initial NAV HTTP client will request and validate one feed page at a time.
+
+Complete pagination, persistent progress tracking, database writes, scheduled
+polling and orchestration will remain outside the client.
+
+The client will disable automatic redirects and only send Bearer credentials
+to URLs using the configured feed origin.
+
+### Reason
+
+A narrow client is easier to test, review and reuse without combining network,
+privacy, database and orchestration responsibilities.
+
+Same-origin enforcement and disabled redirects reduce the risk of forwarding
+the NAV credential to an unexpected destination.
+
+### Consequences
+
+- Feed iteration will be implemented by a separate ingestion workflow.
+- HTTP behaviour can be tested entirely through mocked transports.
+- `next_url` values must be validated before later requests.
+- Transport and response failures are translated into project exceptions.
+- Database progress cannot advance inside the HTTP client.
+
+## ADR-008 — Hash canonical payloads only after privacy minimisation
+
+### Status
+
+Accepted
+
+### Decision
+
+NAV advertisement payloads will be deep-copied and have their top-level
+`contactList` removed before hashing or future persistence.
+
+The minimised payload will be validated and serialized as canonical JSON using
+sorted keys, compact separators and UTF-8 encoding. Its deterministic integrity
+hash will use SHA-256.
+
+### Reason
+
+Hashing before privacy minimisation could create identifiers derived from data
+that the project has explicitly decided not to retain.
+
+Canonical serialization ensures that equivalent JSON objects produce the same
+hash regardless of dictionary insertion order.
+
+### Consequences
+
+- Source objects are not mutated during minimisation.
+- Payloads containing a top-level `contactList` cannot be hashed through the
+  accepted hashing function.
+- Non-JSON values and non-finite numbers are rejected.
+- Equivalent minimised payloads produce the same deterministic hash.
+- The hash supports integrity checking and diagnostics but is not currently the
+  event uniqueness key.
+- Database persistence of the calculated hash remains part of the later
+  event-insertion workflow.

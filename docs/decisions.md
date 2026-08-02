@@ -223,5 +223,54 @@ hash regardless of dictionary insertion order.
 - Equivalent minimised payloads produce the same deterministic hash.
 - The hash supports integrity checking and diagnostics but is not currently the
   event uniqueness key.
-- Database persistence of the calculated hash remains part of the later
-  event-insertion workflow.
+- The source-event repository persists the calculated hash with the accepted
+  privacy-minimised event.
+
+## ADR-009 — Use a caller-owned Psycopg repository for source events
+
+### Status
+
+Accepted
+
+### Decision
+
+The source-event persistence boundary will use Psycopg 3 and parameterised SQL
+to insert privacy-minimised events into `nav_feed_events`.
+
+The repository will receive an existing database connection and will not commit,
+roll back or close that connection.
+
+Duplicate `source_event_id` values will use
+`ON CONFLICT (source_event_id) DO NOTHING`. The repository will return a
+structured duplicate result containing the existing internal event identifier
+rather than treating an expected replay as an infrastructure failure.
+
+The repository will not update `job_advertisements_current` or
+`nav_feed_progress`.
+
+### Reason
+
+Caller-owned transactions allow later ingestion logic to compose source-event
+insertion, current-state maintenance and feed-progress advancement into one
+atomic unit.
+
+Conflict-aware insertion preserves source-event immutability and supports
+idempotent resumable processing without hiding unrelated database failures.
+
+A narrow repository keeps HTTP, privacy, persistence and orchestration
+responsibilities independently testable.
+
+### Consequences
+
+- `DATABASE_URL` is loaded only when database access is requested.
+- Database credentials and complete payloads are excluded from public error
+  messages.
+- JSON payloads use Psycopg's JSONB adaptation.
+- New source events return a generated internal event identifier.
+- Repeated source events return the existing identifier without an update.
+- Check-constraint and infrastructure failures remain visible as safe
+  project-level persistence errors.
+- The caller owns commit, rollback and connection closure.
+- Current-state and feed-progress writes require later repository operations and
+  an orchestration boundary.
+- PostgreSQL integration tests run against an isolated temporary database.

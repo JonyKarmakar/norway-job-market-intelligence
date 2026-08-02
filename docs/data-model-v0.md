@@ -132,9 +132,8 @@ not the initial uniqueness key. Different NAV events may legitimately contain
 the same privacy-minimised payload.
 
 Canonical JSON serialization and deterministic SHA-256 hashing are implemented
-and covered by unit tests in the Python ingestion foundation. Database
-persistence of the calculated hash will be introduced with the event-insertion
-workflow.
+and covered by unit tests in the Python ingestion foundation. The source-event
+repository now persists the calculated hash with each accepted immutable event.
 
 ### `job_advertisements_current`
 
@@ -218,8 +217,9 @@ Processing an accepted feed event should occur in one database transaction:
 If any step fails, the transaction should roll back so feed progress does not
 move beyond data that was not stored successfully.
 
-Duplicate `source_event_id` values should be handled idempotently by future
-ingestion logic rather than creating another historical event.
+Duplicate `source_event_id` values are now handled idempotently by the
+source-event repository. The existing internal event identifier is returned
+without modifying the historical row.
 
 ## Inactive-advertisement handling
 

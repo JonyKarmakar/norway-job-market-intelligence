@@ -5,6 +5,9 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Final
 
+from norway_job_market_intelligence.database.exceptions import (
+    DatabaseConfigurationError,
+)
 from norway_job_market_intelligence.ingestion.exceptions import (
     NavFeedConfigurationError,
 )
@@ -14,6 +17,36 @@ PROJECT_NAME: Final = "Norway Job Market Intelligence Platform"
 DEFAULT_NAV_FEED_URL: Final = "https://pam-stilling-feed.nav.no/api/v1/feed"
 DEFAULT_NAV_FEED_TIMEOUT_SECONDS: Final = 30.0
 DEFAULT_NAV_FEED_USER_AGENT: Final = "norway-job-market-intelligence/0.1.0"
+
+
+@dataclass(frozen=True, slots=True)
+class DatabaseSettings:
+    """Environment-backed PostgreSQL connection configuration."""
+
+    database_url: str | None = field(default=None, repr=False)
+
+    @classmethod
+    def from_environment(
+        cls,
+        environment: Mapping[str, str] | None = None,
+    ) -> "DatabaseSettings":
+        """Load database settings without opening a connection."""
+
+        source = os.environ if environment is None else environment
+
+        return cls(
+            database_url=_optional_environment_value(source.get("DATABASE_URL")),
+        )
+
+    def require_database_url(self) -> str:
+        """Return the configured URL or raise a safe configuration error."""
+
+        if self.database_url is None:
+            raise DatabaseConfigurationError(
+                "DATABASE_URL is required before database persistence."
+            )
+
+        return self.database_url
 
 
 @dataclass(frozen=True, slots=True)

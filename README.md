@@ -102,11 +102,16 @@ The first version intentionally excludes:
 
 ## Current status
 
-**NAV feed client and privacy foundation**
+**NAV source-event repository boundary**
 
-The project now includes a typed and tested NAV feed client foundation, environment-backed configuration, conditional-request support, privacy minimisation, canonical JSON serialization and deterministic SHA-256 hashing.
+The project now includes a typed NAV feed client, privacy minimisation,
+canonical SHA-256 hashing and a tested PostgreSQL repository for inserting
+immutable source events.
 
-All HTTP tests use mocked transports and do not contact the live NAV service. Live NAV ingestion, PostgreSQL persistence, pagination orchestration and feed-progress updates have not started yet.
+The repository uses parameterised Psycopg SQL, JSONB adaptation,
+caller-owned transactions and deliberate duplicate-event handling. Current
+advertisement upserts, feed-progress updates, pagination orchestration and live
+NAV ingestion remain future work.
 
 ## Local setup
 
@@ -159,7 +164,22 @@ make sql-analysis
 ```
 This command initializes a temporary synthetic job-advertisement dataset, runs 21 analytical queries, and rolls back the transaction so no practice data remains in PostgreSQL.
 
-### 7. Stop PostgreSQL
+### 7. Verify the ingestion schema
+
+```bash
+make db-schema-test
+```
+
+### 8. Verify the source-event repository
+
+```bash
+make db-repository-test
+```
+
+This creates an isolated temporary database, applies the migration, runs the
+PostgreSQL repository tests and removes the temporary database afterward.
+
+### 9. Stop PostgreSQL
 
 ```bash
 docker compose down
@@ -207,6 +227,7 @@ git push -u origin feature/nav-feed-client-foundation
 - [Detailed project specification](docs/project-specification.md)
 - [NAV data-source notes](docs/data-source-notes.md)
 - [NAV feed client foundation](docs/nav-feed-client.md)
+- [NAV source-event repository boundary](docs/nav-source-event-repository.md)
 - [Initial NAV ingestion data model](docs/data-model-v0.md)
 - [Architecture decisions](docs/decisions.md)
 - [Development roadmap](docs/roadmap.md)

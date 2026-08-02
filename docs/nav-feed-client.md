@@ -29,7 +29,6 @@ The current foundation does not implement:
 - complete pagination loops
 - scheduled polling
 - retry policies across feed pages
-- PostgreSQL event insertion
 - current-state upserts
 - feed-progress updates
 - Prefect orchestration
@@ -279,10 +278,17 @@ It runs:
 1. Ruff linting.
 2. Ruff formatting verification.
 3. Strict MyPy type checking.
-4. The complete Pytest suite.
+4. The non-PostgreSQL Pytest suite.
 
-GitHub Actions uses the same Makefile target and installs the hash-verified
-development lock file before running the checks.
+PostgreSQL repository tests run separately through:
+
+~~~bash
+make db-repository-test
+~~~
+
+GitHub Actions installs the hash-verified development environment and runs both
+the Python quality workflow and the database-dependent schema and repository
+checks.
 
 ## Future integration order
 
@@ -297,4 +303,8 @@ The intended end-to-end ingestion order is:
 7. Update the current advertisement state.
 8. Advance feed progress only after successful processing.
 
-The current implementation completes steps 1 through 5 only.
+The project now completes steps 1 through 6.
+
+Source-event persistence is documented separately in
+`docs/nav-source-event-repository.md`. Current-state updates and feed-progress
+advancement remain future milestones.

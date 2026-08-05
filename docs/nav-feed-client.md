@@ -29,7 +29,6 @@ The current foundation does not implement:
 - complete pagination loops
 - scheduled polling
 - retry policies across feed pages
-- current-state upserts
 - feed-progress updates
 - Prefect orchestration
 - live NAV ingestion
@@ -303,8 +302,11 @@ The intended end-to-end ingestion order is:
 7. Update the current advertisement state.
 8. Advance feed progress only after successful processing.
 
-The project now completes steps 1 through 6.
+The project now completes steps 1 through 7.
 
-Source-event persistence is documented separately in
-`docs/nav-source-event-repository.md`. Current-state updates and feed-progress
-advancement remain future milestones.
+Source-event persistence is documented in
+`docs/nav-source-event-repository.md`. Current advertisement-state maintenance
+is documented in `docs/current-advertisement-repository.md`.
+
+Feed-progress advancement remains a future repository and orchestration
+milestone.

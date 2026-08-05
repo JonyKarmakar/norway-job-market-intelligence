@@ -238,7 +238,8 @@ It verifies:
 - safe persistence errors
 - absence of current-state and feed-progress SQL
 
-The current non-PostgreSQL suite passes with 67 tests.
+The complete non-PostgreSQL suite currently passes with 85 tests,
+including 18 focused current advertisement-state repository tests.
 
 ### Isolated PostgreSQL tests
 
@@ -258,9 +259,13 @@ The target:
 5. Runs only tests marked `postgres`.
 6. Removes the temporary database after success or failure.
 
-The current PostgreSQL repository suite passes with 10 tests.
+The shared PostgreSQL repository suite currently passes with 22 tests.
 
-The integration tests verify:
+Ten tests remain focused on immutable source-event persistence. The additional
+tests verify current advertisement-state lifecycle, ordering and transaction
+behaviour.
+
+The source-event integration tests verify:
 
 - successful JSONB insertion
 - generated internal event identifiers
@@ -272,8 +277,12 @@ The integration tests verify:
 - visible database constraint failures
 - transaction rollback after a controlled failure
 - continued connection usability after rollback
-- zero writes to `job_advertisements_current`
+- zero implicit writes from the source-event repository to
+  `job_advertisements_current`
 - zero writes to `nav_feed_progress`
+
+Current-state repository behaviour is documented separately in
+`docs/current-advertisement-repository.md`.
 
 All test data is fictional.
 
@@ -283,7 +292,6 @@ This milestone does not implement:
 
 - complete live NAV ingestion
 - automatic extraction of source identifiers from feed items
-- current advertisement upserts
 - feed-progress updates
 - pagination loops
 - retry orchestration
@@ -291,5 +299,6 @@ This milestone does not implement:
 - Prefect flows
 - database roles that physically prohibit event updates
 
-The repository is one tested persistence component, not a complete ingestion
-pipeline.
+Current advertisement-state maintenance is now implemented as a separate
+repository boundary. The two repositories remain persistence components rather
+than a complete ingestion pipeline.

@@ -274,3 +274,72 @@ responsibilities independently testable.
 - Current-state and feed-progress writes require later repository operations and
   an orchestration boundary.
 - PostgreSQL integration tests run against an isolated temporary database.
+
+## ADR-010 — Maintain current advertisement state using conservative source ordering
+
+### Status
+
+Accepted
+
+### Decision
+
+The current advertisement repository will receive an existing Psycopg
+connection, a source advertisement identifier and the internal identifier of an
+already-persisted candidate event.
+
+Status, source timestamp, ingestion timestamp and payload will be loaded from
+the immutable source event rather than supplied again by the caller.
+
+The repository will use `source_updated_at` as the only currently verified
+source-level ordering value.
+
+Its outcomes will be:
+
+- `CREATED` when no current-state row exists
+- `UPDATED` when the candidate source timestamp is later
+- `UNCHANGED` when the candidate is already current
+- `STALE_EVENT_IGNORED` when the candidate timestamp is earlier
+- `ORDERING_UNRESOLVED` for different events with equal timestamps or when
+  either comparison timestamp is missing
+
+The repository will not use internal event identifiers, ingestion timestamps,
+feed order or source-event identifier ordering as chronological tie-breakers.
+
+When a current row already exists, the repository will lock it with
+`SELECT ... FOR UPDATE` before evaluating and applying an update.
+
+The caller will continue to own commit, rollback and connection closure.
+
+### Reason
+
+The current NAV source contract does not provide a verified secondary ordering
+value for events with equal or missing source timestamps.
+
+Using platform storage order or source identifiers as chronology could replace
+a valid current state with an event that is not demonstrably newer.
+
+Deriving current-state values from the stored source event prevents callers
+from supplying status, timestamp or payload values that disagree with the
+referenced history.
+
+Row-level locking protects the read-decide-write sequence for concurrent
+updates to the same advertisement without introducing a complex locking
+framework.
+
+### Consequences
+
+- First current state may be created even when the source timestamp is absent.
+- A clearly newer source event may update current state.
+- A clearly older event remains in history without becoming current.
+- Equal or missing comparison timestamps do not replace current state.
+- An inactive event may become current when it is demonstrably newer.
+- `first_seen_at` is derived from the initial event ingestion time and preserved.
+- `last_seen_at` advances using the accepted candidate ingestion time.
+- A candidate without a usable status cannot become current state.
+- The composite foreign key continues to enforce event ownership.
+- Source-event insertion and current-state maintenance can be rolled back
+  together by the caller.
+- Feed-progress persistence remains a later repository and orchestration
+  milestone.
+- The ordering policy must be reviewed when the live NAV event contract provides
+  stronger chronological evidence.

@@ -217,9 +217,24 @@ Processing an accepted feed event should occur in one database transaction:
 If any step fails, the transaction should roll back so feed progress does not
 move beyond data that was not stored successfully.
 
-Duplicate `source_event_id` values are now handled idempotently by the
+Duplicate `source_event_id` values are handled idempotently by the
 source-event repository. The existing internal event identifier is returned
 without modifying the historical row.
+
+Current-state maintenance loads status, timestamps and payload from the stored
+source event rather than accepting duplicate state values from the caller.
+
+The repository returns one of five explicit outcomes:
+
+- `CREATED` when no current-state row exists
+- `UPDATED` when the candidate source timestamp is later
+- `UNCHANGED` when the candidate event is already current
+- `STALE_EVENT_IGNORED` when the candidate timestamp is earlier
+- `ORDERING_UNRESOLVED` when different events have equal timestamps or either
+  comparison timestamp is missing
+
+When current state already exists, the repository locks that row with
+`SELECT ... FOR UPDATE` before evaluating and applying an update.
 
 ## Inactive-advertisement handling
 
@@ -260,11 +275,20 @@ The timestamp fields have distinct meanings:
   that value is available.
 - `updated_at` records when the feed-progress row was explicitly written.
 
-Source timestamps must not be used as the only event identity or duplicate
-key. Events with missing or equal source timestamps must still be processable.
+Source timestamps are not used as event identity or duplicate keys.
 
-The exact ordering relationship between feed-item identifiers, feed pages and
-source timestamps remains an open question until real responses are inspected.
+For current-state ordering, `source_updated_at` is the only currently verified
+source-level chronological value. A candidate replaces current state only when
+both timestamps exist and the candidate timestamp is later.
+
+Different events with equal timestamps, or comparisons involving a missing
+timestamp, receive the conservative `ORDERING_UNRESOLVED` outcome and do not
+replace current state.
+
+Internal event identifiers, ingestion timestamps, feed order and source-event
+identifier ordering are not used as chronological tie-breakers. This policy
+must be reviewed when the live NAV contract provides stronger ordering
+evidence.
 
 ## Index strategy
 
@@ -355,11 +379,12 @@ At this point:
 
 1. NAV publishes `synthetic-event-002` for the same advertisement.
 2. A second immutable event row is inserted.
-3. The current-state row is updated to reference the second event.
-4. `first_seen_at` remains unchanged.
-5. `last_seen_at`, source status, source timestamp and current payload are
-   updated.
-6. The first event remains available in history.
+3. Its source timestamp is confirmed to be later than the current event.
+4. The current-state row is updated to reference the second event.
+5. `first_seen_at` remains unchanged.
+6. `last_seen_at`, source status, source timestamp and current payload are
+   updated from the stored candidate event.
+7. The first event remains available in history.
 
 At this point:
 

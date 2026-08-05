@@ -102,16 +102,20 @@ The first version intentionally excludes:
 
 ## Current status
 
-**NAV source-event repository boundary**
+**NAV current advertisement-state repository boundary**
 
 The project now includes a typed NAV feed client, privacy minimisation,
-canonical SHA-256 hashing and a tested PostgreSQL repository for inserting
-immutable source events.
+canonical SHA-256 hashing, immutable source-event persistence and tested
+current advertisement-state maintenance.
 
-The repository uses parameterised Psycopg SQL, JSONB adaptation,
-caller-owned transactions and deliberate duplicate-event handling. Current
-advertisement upserts, feed-progress updates, pagination orchestration and live
-NAV ingestion remain future work.
+The PostgreSQL repositories use parameterised Psycopg SQL, JSONB adaptation and
+caller-owned transactions. Source events remain immutable, while current state
+changes only when a candidate event is demonstrably newer. Equal or missing
+source timestamps leave the existing current state unchanged because no
+verified secondary ordering value is currently available.
+
+Feed-progress persistence, page orchestration and live NAV ingestion remain
+future work.
 
 ## Local setup
 
@@ -170,14 +174,15 @@ This command initializes a temporary synthetic job-advertisement dataset, runs 2
 make db-schema-test
 ```
 
-### 8. Verify the source-event repository
+### 8. Verify the NAV repositories
 
 ```bash
 make db-repository-test
 ```
 
 This creates an isolated temporary database, applies the migration, runs the
-PostgreSQL repository tests and removes the temporary database afterward.
+source-event and current advertisement-state PostgreSQL tests, and removes the
+temporary database afterward.
 
 ### 9. Stop PostgreSQL
 
@@ -228,6 +233,7 @@ git push -u origin feature/nav-feed-client-foundation
 - [NAV data-source notes](docs/data-source-notes.md)
 - [NAV feed client foundation](docs/nav-feed-client.md)
 - [NAV source-event repository boundary](docs/nav-source-event-repository.md)
+- [Current advertisement-state repository](docs/current-advertisement-repository.md)
 - [Initial NAV ingestion data model](docs/data-model-v0.md)
 - [Architecture decisions](docs/decisions.md)
 - [Development roadmap](docs/roadmap.md)

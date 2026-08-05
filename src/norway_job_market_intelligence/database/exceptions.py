@@ -15,3 +15,7 @@ class DatabaseConnectionError(DatabaseError):
 
 class SourceEventPersistenceError(DatabaseError):
     """Raised when a NAV source event cannot be persisted."""
+
+
+class CurrentAdvertisementPersistenceError(DatabaseError):
+    """Raised when current NAV advertisement state cannot be maintained."""

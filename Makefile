@@ -65,4 +65,4 @@ db-repository-test: db-up
 	docker compose exec -T db createdb -U "$$db_user" "$$test_db"; \
 	docker compose exec -T db psql -v ON_ERROR_STOP=1 -U "$$db_user" -d "$$test_db" < sql/migrations/001_create_nav_ingestion_schema.sql; \
 	DATABASE_URL="postgresql://$$db_user:$$db_password@$$db_host:$$db_port/$$test_db" \
-		python -m pytest -m postgres tests/integration/test_nav_source_event_repository_postgres.py -q
+		python -m pytest -m postgres tests/integration -q

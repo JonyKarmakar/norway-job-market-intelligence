@@ -54,7 +54,7 @@ jobs:
       - name: Verify NAV ingestion schema
         run: make db-schema-test
 
-      - name: Verify NAV source-event repository
+      - name: Verify NAV repositories
         run: make db-repository-test
 
       - name: Stop PostgreSQL
